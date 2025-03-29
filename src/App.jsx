@@ -247,7 +247,7 @@ function App() {
         <img
           src={title}
           alt="Title"
-          className="block mx-auto max-w-[240px] w-100 h-[100px]"
+          className="block mx-auto max-w-full h-auto"
         />
 
         <img src={blueIcon} alt="" className="absolute top-0 right-0 z-10" />
@@ -281,7 +281,7 @@ function App() {
         </h1>
 
         <div
-          className="grid grid-cols-8 w-[320px] gap-1 p-4 rounded-lg"
+          className="grid grid-cols-8 w-full gap-1 p-4 rounded-lg"
           onMouseLeave={() => {
             setIsSelecting(false);
             setSelectedCells([]);

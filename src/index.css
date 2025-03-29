@@ -105,3 +105,8 @@
 .cell-highlight {
   animation: pulse 1.5s infinite;
 }
+
+
+body {
+  overflow-x: hidden;
+}
