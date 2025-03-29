@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+  }
+}
+
+@keyframes appearFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes colorChange {
+  0% {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  50% {
+    background-color: white;
+  }
+  100% {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.animate-cell-pop {
+  animation: popIn 0.5s ease-out forwards;
+}
+
+.animate-word-appear {
+  animation: fadeInUp 1s ease-in-out forwards;
+}
+
+.animate-counter-appear {
+  animation: fadeInUp 0.4s ease-out 0.2s both;
+}
+
+.animate-word-tag {
+  animation: appearFromRight 0.4s ease-out forwards;
+}
+
+.word-found-animation {
+  background: linear-gradient(
+    90deg,
+    rgba(179, 192, 254, 0.4),
+    rgba(255, 255, 255, 0.8),
+    rgba(179, 192, 254, 0.4)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.cell-highlight {
+  animation: pulse 1.5s infinite;
+}
