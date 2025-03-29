@@ -233,7 +233,7 @@ function App() {
 
   return (
     <div
-      className="min-h-screen relative bg-[#B3C0FE] flex justify-center pt-20 touch-none"
+      className="min-h-screen relative bg-[#B3C0FE] flex justify-center items-start pt-20 touch-none"
       style={{ userSelect: "none" }}
     >
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -255,7 +255,7 @@ function App() {
         <img
           src={starIcon}
           alt=""
-          className="absolute bottom-[15%] left-50 translate-x-[-50%] z-10 "
+          className="absolute bottom-[-15%] left-50 translate-x-[-50%] z-10 "
         />
 
         <div className="text-white text-center h-[28px] mb-2">
