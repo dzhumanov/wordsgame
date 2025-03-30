@@ -5,10 +5,10 @@ import blueIcon from "../src/assets/blueicon.png";
 import pinkIcon from "../src/assets/pinkicon.png";
 import starIcon from "../src/assets/staricon.png";
 
-const WORDS = ["ТОВАР", "МАГАЗИН", "СКИДКА", "КЭШБЕК", "КУПОН"];
+const WORDS = ["ТОВАР", "БОНУС", "ЦЕНА", "ЧЕК", "БАЛЛ"];
 
 const createGrid = (words) => {
-  const size = 8;
+  const size = 6;
   const grid = Array(size)
     .fill("")
     .map(() => Array(size).fill(""));
@@ -25,7 +25,7 @@ const createGrid = (words) => {
   words.forEach((word) => {
     let placed = false;
     let attempts = 0;
-    while (!placed && attempts < 100) {
+    while (!placed && attempts < 500) {
       const direction =
         directions[Math.floor(Math.random() * directions.length)];
       const startX = Math.floor(Math.random() * size);
@@ -88,21 +88,42 @@ function App() {
   const [lastFoundWord, setLastFoundWord] = useState(null);
   const [animatedCells, setAnimatedCells] = useState([]);
   const [showLastWord, setShowLastWord] = useState(false);
+  const [currentSelection, setCurrentSelection] = useState(""); // Добавлено для отображения текущего выбора букв
+  const [displayText, setDisplayText] = useState(
+    "Найдите ассоциации с Едадилом"
+  ); // Текст в заголовке
 
   useEffect(() => {
     resetGame();
   }, []);
 
-  // Эффект для анимации последнего найденного слова
+  // Обновлённый эффект для смены текста в заголовке
   useEffect(() => {
     if (lastFoundWord) {
-      setShowLastWord(false); // Сначала скрываем, чтобы сбросить анимацию
-      // Небольшая задержка перед повторным показом для перезапуска анимации
-      setTimeout(() => {
-        setShowLastWord(true);
-      }, 10);
+      setDisplayText(lastFoundWord); // Устанавливаем найденное слово как текст
+      setShowLastWord(true);
+
+      // Через 2 секунды возвращаем исходный текст
+      const timer = setTimeout(() => {
+        setDisplayText("Найдите ассоциации с Едадилом");
+        setShowLastWord(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
   }, [lastFoundWord]);
+  // Новый эффект для обновления выбранных букв
+  useEffect(() => {
+    if (selectedCells.length > 0) {
+      const selectedWord = getSelectedWord();
+      setCurrentSelection(selectedWord);
+
+      // Обновляем отображаемый текст только если нет недавно найденного слова
+      if (!showLastWord) {
+        setDisplayText(selectedWord);
+      }
+    }
+  }, [selectedCells, showLastWord]);
 
   const resetGame = () => {
     setGrid(createGrid(WORDS));
@@ -112,6 +133,8 @@ function App() {
     setLastFoundWord(null);
     setAnimatedCells([]);
     setShowLastWord(false);
+    setCurrentSelection("");
+    setDisplayText("Найдите ассоциации с Едадилом");
   };
 
   const handleStart = (x, y) => {
@@ -150,32 +173,45 @@ function App() {
       setSelectedCells(newSelection);
     }
   };
-
   const handleEnd = () => {
-    setIsSelecting(false);
-    setStartCell(null);
     const selectedWord = getSelectedWord();
+
     if (
       WORDS.includes(selectedWord) &&
       !foundWords.find((fw) => fw.word === selectedWord)
     ) {
+      // Слово найдено успешно
       const newFoundWord = {
         word: selectedWord,
         cells: [...selectedCells],
         found: Date.now(),
       };
-      setFoundWords((prev) => [...prev, newFoundWord]);
-      setLastFoundWord(selectedWord); // Устанавливаем новое найденное слово
 
-      // Animate found word cells
+      // Анимируем найденные ячейки
       setAnimatedCells([...selectedCells]);
 
-      // Reset animated cells after animation
+      // Обновляем список найденных слов
+      setFoundWords((prev) => [...prev, newFoundWord]);
+
+      // Устанавливаем последнее найденное слово, что запустит useEffect выше
+      setLastFoundWord(selectedWord);
+
+      // Очищаем анимацию после задержки
       setTimeout(() => {
         setAnimatedCells([]);
       }, 600);
+    } else {
+      // Неудачная попытка - сразу возвращаем исходный текст
+      if (!lastFoundWord || !showLastWord) {
+        setDisplayText("Найдите ассоциации с Едадилом");
+      }
     }
+
+    // Сбрасываем состояние выбора независимо от результата
+    setIsSelecting(false);
     setSelectedCells([]);
+    setStartCell(null);
+    setCurrentSelection("");
   };
 
   const getSelectedWord = () => {
@@ -199,14 +235,13 @@ function App() {
     return animatedCells.includes(`${x},${y}`);
   };
 
-  // Новая функция для определения нужной анимации для ячейки
   const getCellClassName = (x, y, letter) => {
     const isFound = isCellInFoundWord(x, y);
     const isSelected = isCellSelected(x, y);
     const isAnimated = isCellAnimated(x, y);
 
     let classes =
-      "w-8 h-8 flex items-center justify-center font-bold text-lg rounded cursor-pointer select-none transition-all";
+      "w-11 h-11 flex items-center justify-center font-bold text-lg rounded cursor-pointer select-none transition-all";
 
     if (isAnimated) {
       classes += " animate-cell-pop";
@@ -219,7 +254,6 @@ function App() {
     return classes;
   };
 
-  // Функция для получения стиля ячейки
   const getCellStyle = (x, y) => {
     const isFound = isCellInFoundWord(x, y);
     const isSelected = isCellSelected(x, y);
@@ -233,7 +267,7 @@ function App() {
 
   return (
     <div
-      className="min-h-screen relative bg-[#B3C0FE] flex justify-center items-start pt-20 touch-none"
+      className="min-h-screen relative bg-[#B3C0FE] flex justify-center items-start pt-10 touch-none"
       style={{ userSelect: "none" }}
     >
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -271,21 +305,27 @@ function App() {
         </div>
 
         <h1
-          key={lastFoundWord} // Добавил key для перерисовки компонента
+          key={displayText}
           className={`
-    text-xl font-bold text-white text-center h-[56px]
-    ${lastFoundWord ? "animate-word-appear !text-4xl" : ""}
+    text-xl font-bold text-white text-center h-[56px] flex items-center justify-center
+    ${lastFoundWord && showLastWord ? "animate-word-appear !text-4xl" : ""}
+    ${currentSelection && !lastFoundWord ? "!text-2xl" : ""}
+    ${displayText === "Найдите ассоциации с Едадилом" ? "pulse-animation" : ""}
   `}
         >
-          {lastFoundWord || "Найдите ассоциации с Едадилом"}
+          {displayText}
         </h1>
 
         <div
-          className="grid grid-cols-8 w-full gap-1 p-4 rounded-lg"
+          className="grid grid-cols-6 w-full gap-1 p-4 rounded-lg"
           onMouseLeave={() => {
             setIsSelecting(false);
             setSelectedCells([]);
             setStartCell(null);
+            setCurrentSelection("");
+            if (!lastFoundWord || !showLastWord) {
+              setDisplayText("Найдите ассоциации с Едадилом");
+            }
           }}
         >
           {grid.map((row, x) =>
@@ -337,32 +377,6 @@ function App() {
             ))
           )}
         </div>
-
-        {/* <div className="mt-4 text-center text-white">
-          <h2 className="text-xl mb-2">Найденные слова:</h2>
-          <div className="flex flex-wrap justify-center gap-2">
-            {foundWords.map((fw, index) => (
-              <span
-                key={fw.word}
-                className="bg-white text-black px-2 py-1 rounded animate-word-tag"
-                style={{
-                  animationDelay: `${index * 0.1}s`,
-                }}
-              >
-                {fw.word}
-              </span>
-            ))}
-          </div>
-        </div> */}
-
-        {/* <div className="text-center mt-4">
-          <button
-            onClick={resetGame}
-            className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 transition-colors"
-          >
-            Новая игра
-          </button>
-        </div> */}
       </div>
     </div>
   );
